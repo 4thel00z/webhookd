@@ -9,7 +9,7 @@ In the future one should be able to upload signed Plugins that add dynamic capab
 ## How do I install it ?
 
 ```
-git clone 
+git clone git@github.com:4thel00z/webhookd.git
 make build
 ```
 

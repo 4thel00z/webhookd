@@ -89,3 +89,6 @@ Date: Thu, 29 Oct 2020 02:03:12 GMT
 ## Acknowledgements
 
 We used my [serviced_template](https://github.com/4thel00z/service_templated) in the process, if the code strikes you as familiar it's probably because you spend too much time on my Github page.
+## License
+
+This project is licensed under the GPL-3 license.

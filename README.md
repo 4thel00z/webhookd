@@ -1,5 +1,7 @@
 # ```webhookd```
 
+![webhookd-tests](https://github.com/4thel00z/webhookd/workflows/Test/badge.svg)
+
 ## What this project is about
 
 This is a daemon that enables you to run your own webhook service.

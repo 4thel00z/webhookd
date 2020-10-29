@@ -45,15 +45,15 @@ func main() {
 		log.Fatal("Error loading .env file. Create an empty .env file if you don't intend to use them")
 	}
 
-	log.Println("\n", aurora.Magenta(banner), "\n")
-	log.Println("👩	Version:", version)
+	log.Println("\n", aurora.Magenta(banner))
+	log.Println("\n", "👩	Version:", version)
 
 	config, err := libwebhook.ParseConfig(*configPath)
 	if err != nil {
 		log.Fatalf("could not parse the configuration because of: %s", err.Error())
 	}
 	addr := *host + ":" + strconv.Itoa(*port)
-	app := libwebhook.NewApp(addr, config, *verbose, *debugFlag, debug.Module,webhook.Module)
+	app := libwebhook.NewApp(addr, config, *verbose, *debugFlag, debug.Module, webhook.Module)
 
 	svc := app.Router.Serve().
 		Filter(typhon.ErrorFilter).

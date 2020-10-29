@@ -1,0 +1,12 @@
+builds:
+  # You can have multiple builds defined as a yaml list
+  -
+       # Path to main.go file or main package.
+    # Default is `.`.
+    main: ./cmd/webhookd/main.go
+
+    # Set the modified timestamp on the output binary, typically
+    # you would do this to ensure a build was reproducible. Pass
+    # empty string to skip modifying the output.
+    # Default is empty string.
+    mod_timestamp: '{{ .CommitTimestamp }}'

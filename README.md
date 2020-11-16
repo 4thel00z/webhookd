@@ -1,6 +1,7 @@
 # ```webhookd```
 
 ![webhookd-tests](https://github.com/4thel00z/webhookd/workflows/Test/badge.svg)
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/4thel00z/webhookd/latest/total?style=for-the-badge)
 
 ## What this project is about
 

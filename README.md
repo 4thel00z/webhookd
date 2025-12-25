@@ -1,5 +1,8 @@
 <div align="center">
   <h1>webhookd</h1>
+  <p>
+    <img src="logo.png" alt="webhookd logo" width="320" />
+  </p>
   <p><strong>Self-hosted webhook generator</strong> — create a webhook, get a URL, serve static JSON with custom headers.</p>
 
   <p>
@@ -7,7 +10,7 @@
     <a href="https://github.com/4thel00z/webhookd/actions/workflows/release-please.yml"><img alt="release-please" src="https://github.com/4thel00z/webhookd/actions/workflows/release-please.yml/badge.svg?branch=master" /></a>
     <a href="https://github.com/4thel00z/webhookd/actions/workflows/goreleaser.yml"><img alt="goreleaser" src="https://github.com/4thel00z/webhookd/actions/workflows/goreleaser.yml/badge.svg" /></a>
     <a href="https://github.com/4thel00z/webhookd/releases"><img alt="Release" src="https://img.shields.io/github/v/release/4thel00z/webhookd?sort=semver" /></a>
-    <a href="COPYING"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-informational" /></a>
+    <a href="COPYING"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-informational" /></a>
     <a href="https://github.com/4thel00z/webhookd/pkgs/container/webhookd"><img alt="GHCR" src="https://img.shields.io/badge/ghcr-webhookd-blue" /></a>
   </p>
 </div>
@@ -115,4 +118,4 @@ go test ./...
 
 ## License
 
-GPL-3.0 — see [`COPYING`](COPYING).
+MIT — see [`COPYING`](COPYING).

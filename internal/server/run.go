@@ -15,6 +15,7 @@ import (
 	"webhookd/internal/application/webhooks"
 	"webhookd/internal/infrastructure/configfile"
 	"webhookd/internal/infrastructure/repository/memory"
+	"webhookd/internal/observability"
 	"webhookd/internal/transport/httpapi"
 )
 
@@ -29,6 +30,11 @@ type Options struct {
 func Run(ctx context.Context, opts Options) error {
 	// Optional .env load for local dev.
 	_ = godotenv.Load()
+
+	otelShutdown, err := observability.SetupFromEnv(ctx, "webhookd", opts.Version)
+	if err != nil {
+		return fmt.Errorf("opentelemetry setup: %w", err)
+	}
 
 	cfg, err := configfile.ParseFile(opts.ConfigPath)
 	if err != nil {
@@ -73,5 +79,10 @@ func Run(ctx context.Context, opts Options) error {
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	return app.ShutdownWithContext(shutdownCtx)
+	appErr := app.ShutdownWithContext(shutdownCtx)
+	otelErr := otelShutdown(shutdownCtx)
+	if appErr != nil {
+		return appErr
+	}
+	return otelErr
 }

@@ -91,6 +91,21 @@ Example:
 }
 ```
 
+## OpenTelemetry
+
+Tracing is **disabled by default**. Enable it by setting either:
+- `WEBHOOKD_OTEL_ENABLED=true`, or
+- `OTEL_EXPORTER_OTLP_ENDPOINT` / `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
+
+Useful env vars:
+- `WEBHOOKD_OTEL_ENABLED`: `true|false`
+- `WEBHOOKD_OTEL_EXPORTER_OTLP_ENDPOINT`: OTLP HTTP endpoint (full URL or `host:port`). Example: `http://localhost:4318`
+- `WEBHOOKD_OTEL_EXPORTER_OTLP_HEADERS`: comma-separated `k=v` pairs
+- `WEBHOOKD_OTEL_EXPORTER_OTLP_INSECURE`: when using `host:port`, prefixes with `http://` instead of `https://`
+- `WEBHOOKD_OTEL_TRACES_SAMPLER_RATIO`: `0..1` (default `1`)
+- `WEBHOOKD_OTEL_SERVICE_NAME`: override service name (default `webhookd`)
+- `WEBHOOKD_ENV` / `ENV`: sets `deployment.environment.name`
+
 
 ## Development
 

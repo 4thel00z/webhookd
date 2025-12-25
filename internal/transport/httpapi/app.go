@@ -7,6 +7,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humafiber"
+	"github.com/gofiber/contrib/otelfiber/v2"
 	"github.com/gofiber/fiber/v2"
 
 	"webhookd/internal/application/webhooks"
@@ -27,6 +28,9 @@ func NewApp(d Deps) (*fiber.App, error) {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})
+
+	// Request spans are no-ops unless a TracerProvider is configured (see internal/observability).
+	app.Use(otelfiber.Middleware())
 
 	// Non-API health check.
 	app.Get("/healthz", func(c *fiber.Ctx) error {

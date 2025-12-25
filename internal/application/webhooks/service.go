@@ -59,5 +59,3 @@ func (s *Service) Touch(ctx context.Context, id webhook.ID) (*webhook.Hook, bool
 func (s *Service) List(ctx context.Context) (map[webhook.ID]*webhook.Hook, error) {
 	return s.repo.List(ctx)
 }
-
-

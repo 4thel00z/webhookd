@@ -83,5 +83,3 @@ func cloneHook(h *webhook.Hook) *webhook.Hook {
 	}
 	return &c
 }
-
-

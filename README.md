@@ -91,14 +91,6 @@ Example:
 }
 ```
 
-## Architecture (strict DDD)
-
-Code is organized in layered DDD:
-
-- **domain**: `internal/domain/*` (entities / aggregates)
-- **application**: `internal/application/*` (use-cases + ports)
-- **infrastructure**: `internal/infrastructure/*` (repositories, auth, config parsing)
-- **transport**: `internal/transport/*` (HTTP API, CLI, runtime composition)
 
 ## Development
 

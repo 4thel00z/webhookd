@@ -14,5 +14,3 @@ type WebhookRepository interface {
 	Touch(ctx context.Context, id webhook.ID, now time.Time) (*webhook.Hook, bool, error)
 	List(ctx context.Context) (map[webhook.ID]*webhook.Hook, error)
 }
-
-

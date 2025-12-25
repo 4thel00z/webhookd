@@ -29,13 +29,30 @@ type Options struct {
 func Run(ctx context.Context, opts Options) error {
 	_ = godotenv.Load()
 
-	cfg, err := configfile.ParseFile(opts.ConfigPath)
+	cfgPath := opts.ConfigPath
+	cfg, err := configfile.ParseFile(cfgPath)
 	if err != nil {
-		if !os.IsNotExist(err) || opts.ConfigPath != ".webhookdrc.json" {
+		switch {
+		case os.IsNotExist(err) && cfgPath == "webhookd.json":
+			legacyPath := ".webhookdrc.json"
+			if _, statErr := os.Stat(legacyPath); statErr == nil {
+				log.Printf("config file %q not found; using legacy %q (deprecated)", cfgPath, legacyPath)
+				cfg, err = configfile.ParseFile(legacyPath)
+				if err != nil {
+					return fmt.Errorf("parse config: %w", err)
+				}
+			} else if os.IsNotExist(statErr) {
+				log.Printf("config file %q not found; starting with defaults", cfgPath)
+				cfg = configfile.Config{}
+			} else {
+				return fmt.Errorf("stat legacy config %q: %w", legacyPath, statErr)
+			}
+		case os.IsNotExist(err) && cfgPath == ".webhookdrc.json":
+			log.Printf("config file %q not found; starting with defaults", cfgPath)
+			cfg = configfile.Config{}
+		default:
 			return fmt.Errorf("parse config: %w", err)
 		}
-		log.Printf("config file %q not found; starting with defaults", opts.ConfigPath)
-		cfg = configfile.Config{}
 	}
 
 	repo := memory.NewWebhooksRepo()

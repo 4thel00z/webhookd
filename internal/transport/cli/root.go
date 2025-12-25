@@ -22,7 +22,7 @@ func NewRoot() *cobra.Command {
 	opts := &RootOptions{
 		Host:   "0.0.0.0",
 		Port:   1337,
-		Config: ".webhookdrc.json",
+		Config: "webhookd.json",
 	}
 
 	cmd := &cobra.Command{

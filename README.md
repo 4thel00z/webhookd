@@ -1,97 +1,111 @@
-# ```webhookd```
+<div align="center">
+  <h1>webhookd</h1>
+  <p><strong>Self-hosted webhook generator</strong> — create a webhook, get a URL, serve static JSON with custom headers.</p>
 
-![webhookd-tests](https://github.com/4thel00z/webhookd/workflows/Test/badge.svg)
-![GitHub release (latest by date)](https://img.shields.io/github/downloads/4thel00z/webhookd/latest/total?style=for-the-badge)
+  <p>
+    <a href="https://github.com/4thel00z/webhookd/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/4thel00z/webhookd/actions/workflows/ci.yml/badge.svg?branch=master" /></a>
+    <a href="https://github.com/4thel00z/webhookd/actions/workflows/release-please.yml"><img alt="release-please" src="https://github.com/4thel00z/webhookd/actions/workflows/release-please.yml/badge.svg?branch=master" /></a>
+    <a href="https://github.com/4thel00z/webhookd/actions/workflows/goreleaser.yml"><img alt="goreleaser" src="https://github.com/4thel00z/webhookd/actions/workflows/goreleaser.yml/badge.svg" /></a>
+    <a href="https://github.com/4thel00z/webhookd/releases"><img alt="Release" src="https://img.shields.io/github/v/release/4thel00z/webhookd?sort=semver" /></a>
+    <a href="COPYING"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-informational" /></a>
+    <a href="https://github.com/4thel00z/webhookd/pkgs/container/webhookd"><img alt="GHCR" src="https://img.shields.io/badge/ghcr-webhookd-blue" /></a>
+  </p>
+</div>
 
-## What this project is about
+## What is this?
 
-This is a daemon that enables you to run your own webhook service.
-It provides a route for generating a webhook which serves static content.
-In the future one should be able to upload signed Plugins that add dynamic capabilities.
+`webhookd` is a small daemon that lets you:
+- **create** a webhook (`POST /v1/webhooks`)
+- **invoke** it at a stable URL (`/v1/hooks/{id}`) with the configured method
+- **deactivate** it (`DELETE /v1/webhooks/{id}`)
 
-## How do I install it ?
+The HTTP layer is built with [Fiber](https://github.com/gofiber/fiber) and documented with [Huma](https://github.com/danielgtaylor/huma) (OpenAPI + JSON Schema). The CLI uses [Fang](https://github.com/charmbracelet/fang).
 
-```
-git clone git@github.com:4thel00z/webhookd.git
-make build
-```
+## Quickstart
 
-## Ok, but how do I run this cringelord ? :S
+### Run locally (Go)
 
-In one terminal you can do:
-
-```
-➜  webhookd git:(master) make run
-2020/10/29 02:58:38
-
-              ___.   .__                   __       .___
-__  _  __ ____\_ |__ |  |__   ____   ____ |  | __ __| _/
-\ \/ \/ // __ \| __ \|  |  \ /  _ \ /  _ \|  |/ // __ |
- \     /\  ___/| \_\ \   Y  (  <_> |  <_> )    </ /_/ |
-  \/\_/  \___  >___  /___|  /\____/ \____/|__|_ \____ |
-             \/    \/     \/                   \/    \/
-
-2020/10/29 02:58:38 👩  Version: 0.0.1
-2020/10/29 02:58:38 🏁  Listening on [::]:1337
-2020/10/29 02:58:38 👠  The routes 🛣️  are:
-2020/10/29 02:58:38     http://[::]:1337/v1/debug/routes with method: GET
-2020/10/29 02:58:38     Query this endpoint like this:
-                curl http://0.0.0.0:1337/v1/debug/routes
-2020/10/29 02:58:38     http://[::]:1337/v1/debug/private with method: GET
-2020/10/29 02:58:38     Query this endpoint like this:
-                curl http://0.0.0.0:1337/v1/debug/private
-2020/10/29 02:58:38     http://[::]:1337/v1/webhook/generate with method: POST
-2020/10/29 02:58:38     Query this endpoint like this:
-                curl -X POST http://0.0.0.0:1337/v1/webhook/generate
-2020/10/29 02:58:38     http://[::]:1337/v1/webhook/unregister with method: POST
-2020/10/29 02:58:38     Query this endpoint like this:
-                curl -X POST http://0.0.0.0:1337/v1/webhook/unregister
-
+```bash
+go run ./cmd/webhookd --port 1337
 ```
 
-Using your favourite http client you can now send a request to the webhookd like this:
+Or explicitly:
 
+```bash
+go run ./cmd/webhookd serve --port 1337
 ```
-➜  webhookd git:(master) http POST http://0.0.0.0:1337/v1/webhook/generate < examples/generate_webhook.json
-HTTP/1.1 200 OK
-Content-Length: 60
-Content-Type: application/json
-Date: Thu, 29 Oct 2020 01:58:43 GMT
 
+### Run with Docker (GHCR)
+
+```bash
+docker run --rm -p 1337:1337 ghcr.io/4thel00z/webhookd:latest --host 0.0.0.0 --port 1337
+```
+
+## API
+
+### Create a webhook
+
+```bash
+curl -s -X POST http://localhost:1337/v1/webhooks \
+  -H 'content-type: application/json' \
+  -d '{"method":"GET","body":"hello","headers":{}}'
+```
+
+Response contains the `id` and `path` (Huma also adds `$schema`):
+
+```json
+{"$schema":"http://localhost:1337/schemas/Post-v1-webhooksResponse.json","id":"...","path":"/v1/hooks/..."}
+```
+
+### Invoke it
+
+```bash
+curl -s http://localhost:1337/v1/hooks/<id>
+```
+
+### Deactivate it
+
+```bash
+curl -s -X DELETE http://localhost:1337/v1/webhooks/<id>
+```
+
+### OpenAPI / docs
+
+- **Docs UI**: `GET /docs`
+- **OpenAPI**: `GET /openapi.json` and `GET /openapi.yaml`
+- **JSON Schemas**: `GET /schemas/*`
+
+## Configuration
+
+By default, `webhookd` looks for `.webhookdrc.json`. If it doesn’t exist, it starts with defaults.
+
+Example:
+
+```json
 {
-    "path": "/v1/webhook/4122493a-fd9b-4ec8-7861-bcafc1e4d5c4"
-}
-
-```
-
-It will return the path under which you can find your webhook.
-The webhook is defined in an (exemplary) file called `examples/generate_webhook.json` which can also be found in this repo.
-We produce it here for brevity:
-
-```
-{
-"method" : "get",
-"body" : "4thel00z is the real deal",
-"headers" : {}
+  "enable_auth_on_options": false,
+  "token_extractors": ["headers", "params"],
+  "oauth_json_web_key_sets_url": "https://example.com/.well-known/jwks.json",
+  "oauth_issuer": "https://example.com/",
+  "oauth_audience": "my-audience"
 }
 ```
 
-We can then simply call the webhook and it will send us back the specified body and headers:
+## Architecture (strict DDD)
 
+Code is organized in layered DDD:
+
+- **domain**: `internal/domain/*` (entities / aggregates)
+- **application**: `internal/application/*` (use-cases + ports)
+- **infrastructure**: `internal/infrastructure/*` (repositories, auth, config parsing)
+- **transport**: `internal/transport/*` (HTTP API, CLI, runtime composition)
+
+## Development
+
+```bash
+go test ./...
 ```
-➜  webhookd git:(master) ✗ http GET http://0.0.0.0:1337/v1/webhook/4122493a-fd9b-4ec8-7861-bcafc1e4d5c4
-HTTP/1.1 200 OK
-Content-Length: 28
-Content-Type: application/json
-Date: Thu, 29 Oct 2020 02:03:12 GMT
 
-"4thel00z is the real deal"
-
-```
-
-## Acknowledgements
-
-We used my [serviced_template](https://github.com/4thel00z/service_templated) in the process, if the code strikes you as familiar it's probably because you spend too much time on my Github page.
 ## License
 
-This project is licensed under the GPL-3 license.
+GPL-3.0 — see [`COPYING`](COPYING).

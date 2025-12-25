@@ -1,4 +1,17 @@
 .git
+.github
+.cursor
+_adr
+
+build
+dist
+
+**/*.log
+**/*.tmp
+.DS_Store
+
+vendor
+.git
 Dockerfile
 _adr
 build

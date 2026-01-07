@@ -1,0 +1,91 @@
+name: release
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - release-please-manifest.json
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine release tag
+        id: vars
+        run: |
+          version="$(jq -r '."."' release-please-manifest.json)"
+          if [ -z "$version" ] || [ "$version" = "null" ]; then
+            echo "Could not read version from release-please-manifest.json" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag (if missing)
+        id: tag
+        env:
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          git fetch --tags --force
+          head_sha="$(git rev-parse HEAD)"
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            tag_sha="$(git rev-list -n 1 "$TAG")"
+            if [ "$tag_sha" != "$head_sha" ]; then
+              echo "Tag $TAG already exists at $tag_sha, but HEAD is $head_sha. Skipping release."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Tag $TAG already exists on HEAD, continuing."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            git tag -a "$TAG" -m "$TAG"
+            git push origin "$TAG"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-go@v5
+        if: steps.tag.outputs.skip != 'true'
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: docker/setup-qemu-action@v3
+        if: steps.tag.outputs.skip != 'true'
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.tag.outputs.skip != 'true'
+
+      - uses: docker/login-action@v3
+        if: steps.tag.outputs.skip != 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: goreleaser/goreleaser-action@v6
+        if: steps.tag.outputs.skip != 'true'
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --config .goreleaser.yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
